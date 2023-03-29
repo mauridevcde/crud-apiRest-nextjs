@@ -12,14 +12,10 @@ import { useRouter } from "next/router";
 import * as yup from "yup";
 
 interface NewTaskFormValue {
+  id: string;
   title: string;
   description: string;
 }
-
-const initialValues: NewTaskFormValue = {
-  title: "",
-  description: "",
-};
 
 const isRequired = "Este campo es obligatorio";
 const schema = yup.object({
@@ -27,28 +23,34 @@ const schema = yup.object({
   description: yup.string().required(isRequired),
 });
 
-export default function NewTask() {
+export default function EditTask({ task }: { task: any }) {
   const router = useRouter();
-
+  console.log(task);
+  const initialValues: NewTaskFormValue = {
+    id: task.id,
+    title: task.title,
+    description: task.description,
+  };
   const handleSubmitNewTask = async (values: NewTaskFormValue) => {
-    console.log(values);
     const requestOptions = {
-      method: "POST",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
     };
 
     const response = await fetch(
-      "http://localhost:3000/api/tasks/",
+      `http://localhost:3000/api/tasks/${values.id}`,
       requestOptions
     );
+
     //status http
+
     if (response.status !== 200) {
       console.log("Error");
       return;
     }
-    const data = await response.json();
 
+    const data = await response.json();
     console.log(data);
 
     //redirect to home
@@ -84,7 +86,7 @@ export default function NewTask() {
                 }}
               >
                 <Typography variant="h5" component="div">
-                  New Task
+                  Edit Task
                 </Typography>
 
                 <div
@@ -125,7 +127,7 @@ export default function NewTask() {
                           style={{ marginTop: "20px", width: "100%" }}
                           type="submit"
                         >
-                          Create
+                          Edit
                         </Button>
                       </Form>
                     )}
@@ -138,4 +140,17 @@ export default function NewTask() {
       </Grid>
     </Layout>
   );
+}
+
+export async function getServerSideProps({ params }: any) {
+  console.log(params.id);
+
+  const res = await fetch(`http://localhost:3000/api/tasks/${params.id}`);
+  const data = await res.json();
+
+  return {
+    props: {
+      task: data,
+    },
+  };
 }

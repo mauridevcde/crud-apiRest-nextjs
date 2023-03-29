@@ -17,7 +17,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     case "POST":
       try {
         const { title, description } = body;
-        console.log("ssssssssssssssssssssss", title, description);
         if (!title || !description) {
           return res.status(400).json({ error: "Bad request" });
         }
